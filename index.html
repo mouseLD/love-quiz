@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Our Little Quiz 💖</title>
+<style>
+    body {
+        font-family: 'Segoe UI', sans-serif;
+        background: linear-gradient(135deg, #ffdde1, #ee9ca7);
+        color: #333;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+    }
+
+    .container {
+        background: #fff;
+        width: 90%;
+        max-width: 700px;
+        padding: 30px;
+        border-radius: 16px;
+        box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+        text-align: center;
+    }
+
+    h1 {
+        color: #e63946;
+    }
+
+    .options button {
+        display: block;
+        width: 100%;
+        margin: 8px 0;
+        padding: 12px;
+        border-radius: 8px;
+        border: none;
+        background: #f1f1f1;
+        cursor: pointer;
+        font-size: 16px;
+    }
+
+    .options button:hover {
+        background: #ffd6e0;
+    }
+
+    .score {
+        margin-top: 10px;
+        font-weight: bold;
+    }
+
+    textarea {
+        width: 100%;
+        height: 80px;
+        margin-top: 10px;
+        border-radius: 8px;
+        padding: 10px;
+        border: 1px solid #ccc;
+    }
+
+    .btn {
+        margin-top: 15px;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 8px;
+        background: #e63946;
+        color: #fff;
+        cursor: pointer;
+    }
+
+    .love-note {
+        background: #fff0f3;
+        padding: 25px;
+        border-radius: 14px;
+        font-size: 16px;
+        margin-top: 20px;
+    }
+
+    .final {
+        background: linear-gradient(135deg, #fff1c1, #ffd6a5);
+        border-radius: 18px;
+        padding: 40px;
+        position: relative;
+    }
+
+    .final::before {
+        content: "💌";
+        font-size: 50px;
+        position: absolute;
+        top: -20px;
+        right: 20px;
+    }
+
+    .rose {
+        font-size: 40px;
+        margin-bottom: 10px;
+    }
+</style>
+</head>
+<body>
+
+<div class="container">
+    <h1>💖 Our Quiz 💖</h1>
+    <div id="quiz"></div>
+    <div class="score" id="score">Score: 0</div>
+</div>
+
+<script>
+let score = 0;
+let questionIndex = 0;
+let attempts = 0;
+
+const quizDiv = document.getElementById("quiz");
+const scoreDiv = document.getElementById("score");
+
+const mcqs = [
+    {
+        q: "What is that one meal we had the most?",
+        options: ["California Burrito", "Malai Kofta", "Noodles", "Each other"],
+        answer: 1,
+        message: "You thought, didn't you?"
+    },
+    {
+        q: "What do Ayush love the most about you?",
+        options: ["Adaptability", "How smart you are", "How hardworking you are", "How growth oriented you are"],
+        answer: 3
+    },
+    {
+        q: "What do Ayush like the most about your face?",
+        options: ["Eyes", "Lips", "Cheeks", "Smile"],
+        answer: -1,
+        message: "You whole face obv 💖"
+    },
+    {
+        q: "What fact shocked Ayush the most about you?",
+        options: ["Your godly singing", "Swimmingggg", "Your humour", "The fact that you love him"],
+        answer: 0
+    },
+    {
+        q: "What is that one international destination we both want to go to?",
+        options: ["Bali", "Japan", "Europe", "New Zealand"],
+        answer: 1
+    }
+];
+
+const essays = [
+    "One thing that you find hilarious about this relationship.",
+    "One most unexpected thing that this relationship gave you.",
+    "Do you think you will have fun going ahead?",
+    "What is your fav childhood cartoons?",
+    "What is that one thing that you would like to add in this relationship?"
+];
+
+function loadMCQ() {
+    attempts = 0;
+    const q = mcqs[questionIndex];
+    quizDiv.innerHTML = `<h3>${q.q}</h3><div class="options"></div>`;
+    const optionsDiv = quizDiv.querySelector(".options");
+
+    q.options.forEach((opt, i) => {
+        const btn = document.createElement("button");
+        btn.innerText = opt;
+        btn.onclick = () => checkAnswer(i);
+        optionsDiv.appendChild(btn);
+    });
+}
+
+function checkAnswer(selected) {
+    const q = mcqs[questionIndex];
+    attempts++;
+
+    if (selected === q.answer && q.answer !== -1) {
+        score += 10;
+        scoreDiv.innerText = `Score: ${score}`;
+        alert(q.message || "Correct 💖");
+        questionIndex++;
+        nextStep();
+    } else {
+        if (attempts >= 2) {
+            alert(q.message || "Oops! Moving ahead 😛");
+            questionIndex++;
+            nextStep();
+        } else {
+            alert("Try again 👀");
+        }
+    }
+}
+
+function loadEssay() {
+    quizDiv.innerHTML = `
+        <h3>${essays[questionIndex - 5]}</h3>
+        <textarea placeholder="Type your answer here..."></textarea>
+        <button class="btn" onclick="nextEssay()">Submit</button>
+    `;
+}
+
+function nextEssay() {
+    score += 10;
+    scoreDiv.innerText = `Score: ${score}`;
+    questionIndex++;
+    nextStep();
+}
+
+function nextStep() {
+    if (questionIndex < 5) {
+        loadMCQ();
+    } else if (questionIndex === 5) {
+        quizDiv.innerHTML = `
+        <div class="love-note">
+        "I am in love with you, with your humour, your face, your existence and your eye rolls.
+        I would eat those rolls. Every moment spent with you passes by in a flash just like these
+        2 months and every moment is just that special. You make it special.
+        I am sorry for making you go through so many hardships this month and thank you so much
+        for sticking by. Grateful."
+        </div>
+        <button class="btn" onclick="nextStep()">Continue 💕</button>`;
+        questionIndex++;
+    } else if (questionIndex < 11) {
+        loadEssay();
+    } else {
+        showFinal();
+    }
+}
+
+function showFinal() {
+    quizDiv.innerHTML = `
+    <div class="final">
+        <div class="rose">🌹</div>
+        <h2>Happy 2 Months 💖</h2>
+        <p>
+        Happy 2 months poplu. Love irritating you and love seeing your face and holding your hands.
+        Everything else is just a bonus and who does not love bonuses? XD.
+        Mai thoda stupid aur cringe hoon, toh thank you mujhe jhelne ke liye and last thing I would like to say is —
+        <br><br><b>Jay banana, Jay tarbooz 🍉</b>
+        </p>
+        <h3>Final Score: ${score}/100</h3>
+    </div>`;
+}
+
+loadMCQ();
+</script>
+
+</body>
+</html>
