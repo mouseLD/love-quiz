@@ -1,243 +1,233 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="UTF-8">
-<title>Our Little Quiz 💖</title>
+<title>Our Quiz 💖</title>
+
+<!-- EmailJS -->
+<script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+
 <style>
-    body {
-        font-family: 'Segoe UI', sans-serif;
-        background: linear-gradient(135deg, #ffdde1, #ee9ca7);
-        color: #333;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        min-height: 100vh;
-    }
+body {
+    margin: 0;
+    font-family: 'Segoe UI', sans-serif;
+}
 
-    .container {
-        background: #fff;
-        width: 90%;
-        max-width: 700px;
-        padding: 30px;
-        border-radius: 16px;
-        box-shadow: 0 15px 30px rgba(0,0,0,0.15);
-        text-align: center;
-    }
+/* START SCREEN */
+#startScreen {
+    background: #6a0dad;
+    color: white;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
 
-    h1 {
-        color: #e63946;
-    }
+.mouse {
+    font-size: 80px;
+}
 
-    .options button {
-        display: block;
-        width: 100%;
-        margin: 8px 0;
-        padding: 12px;
-        border-radius: 8px;
-        border: none;
-        background: #f1f1f1;
-        cursor: pointer;
-        font-size: 16px;
-    }
+.start-btn {
+    margin: 10px;
+    padding: 12px 25px;
+    font-size: 18px;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+}
 
-    .options button:hover {
-        background: #ffd6e0;
-    }
+/* QUIZ */
+#quizContainer {
+    display: none;
+    background: linear-gradient(135deg, #ffdde1, #ee9ca7);
+    min-height: 100vh;
+    padding: 30px;
+}
 
-    .score {
-        margin-top: 10px;
-        font-weight: bold;
-    }
+.container {
+    background: white;
+    max-width: 750px;
+    margin: auto;
+    padding: 30px;
+    border-radius: 18px;
+    text-align: center;
+}
 
-    textarea {
-        width: 100%;
-        height: 80px;
-        margin-top: 10px;
-        border-radius: 8px;
-        padding: 10px;
-        border: 1px solid #ccc;
-    }
+.options button {
+    width: 100%;
+    margin: 8px 0;
+    padding: 12px;
+    border-radius: 10px;
+    border: none;
+}
 
-    .btn {
-        margin-top: 15px;
-        padding: 10px 20px;
-        border: none;
-        border-radius: 8px;
-        background: #e63946;
-        color: #fff;
-        cursor: pointer;
-    }
+textarea {
+    width: 100%;
+    height: 90px;
+    border-radius: 10px;
+    padding: 10px;
+}
 
-    .love-note {
-        background: #fff0f3;
-        padding: 25px;
-        border-radius: 14px;
-        font-size: 16px;
-        margin-top: 20px;
-    }
-
-    .final {
-        background: linear-gradient(135deg, #fff1c1, #ffd6a5);
-        border-radius: 18px;
-        padding: 40px;
-        position: relative;
-    }
-
-    .final::before {
-        content: "💌";
-        font-size: 50px;
-        position: absolute;
-        top: -20px;
-        right: 20px;
-    }
-
-    .rose {
-        font-size: 40px;
-        margin-bottom: 10px;
-    }
+.btn {
+    margin-top: 15px;
+    padding: 10px 22px;
+    background: #e63946;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+}
 </style>
 </head>
+
 <body>
 
-<div class="container">
-    <h1>💖 Our Quiz 💖</h1>
-    <div id="quiz"></div>
-    <div class="score" id="score">Score: 0</div>
+<!-- START SCREEN -->
+<div id="startScreen">
+    <div class="mouse">🐭</div>
+    <h1>Are you ready to enter<br>3rd month with Ayush?</h1>
+    <button class="start-btn" onclick="startQuiz()">Yes 💖</button>
+    <button class="start-btn" id="noBtn" onclick="convertNo()">No 🙃</button>
+</div>
+
+<!-- SPOTIFY MUSIC -->
+<iframe id="music" style="display:none"
+src="https://open.spotify.com/embed/track/4DERyalxTlWCdlHkVi0TfO"
+width="300" height="80" frameborder="0"
+allow="autoplay; clipboard-write; encrypted-media;">
+</iframe>
+
+<!-- QUIZ -->
+<div id="quizContainer">
+    <div class="container">
+        <h1>💖 Our Quiz 💖</h1>
+        <div id="quiz"></div>
+        <div id="score">Score: 0</div>
+    </div>
 </div>
 
 <script>
+// ✅ EMAILJS INITIALIZATION
+emailjs.init("tPOE5-CBzJeJdYb76");
+
 let score = 0;
-let questionIndex = 0;
+let index = 0;
 let attempts = 0;
+let answers = [];
 
 const quizDiv = document.getElementById("quiz");
-const scoreDiv = document.getElementById("score");
 
 const mcqs = [
-    {
-        q: "What is that one meal we had the most?",
-        options: ["California Burrito", "Malai Kofta", "Noodles", "Each other"],
-        answer: 1,
-        message: "You thought, didn't you?"
-    },
-    {
-        q: "What do Ayush love the most about you?",
-        options: ["Adaptability", "How smart you are", "How hardworking you are", "How growth oriented you are"],
-        answer: 3
-    },
-    {
-        q: "What do Ayush like the most about your face?",
-        options: ["Eyes", "Lips", "Cheeks", "Smile"],
-        answer: -1,
-        message: "You whole face obv 💖"
-    },
-    {
-        q: "What fact shocked Ayush the most about you?",
-        options: ["Your godly singing", "Swimmingggg", "Your humour", "The fact that you love him"],
-        answer: 0
-    },
-    {
-        q: "What is that one international destination we both want to go to?",
-        options: ["Bali", "Japan", "Europe", "New Zealand"],
-        answer: 1
-    }
+ {q:"What is that one meal we had the most?",
+  o:["California Burrito","Malai Kofta","Noodles","Each other"], a:1, m:"You thought, didn't you?"},
+ {q:"What do Ayush love the most about you?",
+  o:["Adaptability","Smart","Hardworking","Growth oriented"], a:3},
+ {q:"What do Ayush like the most about your face?",
+  o:["Eyes","Lips","Cheeks","Smile"], a:-1, m:"Your whole face obv 💖"},
+ {q:"What fact shocked Ayush the most about you?",
+  o:["Your godly singing","Swimming","Humour","You love him"], a:0},
+ {q:"What international destination we want?",
+  o:["Bali","Japan","Europe","New Zealand"], a:1}
 ];
 
 const essays = [
-    "One thing that you find hilarious about this relationship.",
-    "One most unexpected thing that this relationship gave you.",
-    "Do you think you will have fun going ahead?",
-    "What is your fav childhood cartoons?",
-    "What is that one thing that you would like to add in this relationship?"
+ "One thing you find hilarious about this relationship",
+ "Most unexpected thing this relationship gave you",
+ "Do you think you will have fun going ahead?",
+ "Fav childhood cartoon?",
+ "One thing you’d like to add in this relationship"
 ];
 
-function loadMCQ() {
-    attempts = 0;
-    const q = mcqs[questionIndex];
-    quizDiv.innerHTML = `<h3>${q.q}</h3><div class="options"></div>`;
-    const optionsDiv = quizDiv.querySelector(".options");
-
-    q.options.forEach((opt, i) => {
-        const btn = document.createElement("button");
-        btn.innerText = opt;
-        btn.onclick = () => checkAnswer(i);
-        optionsDiv.appendChild(btn);
-    });
+function startQuiz(){
+ document.getElementById("startScreen").style.display="none";
+ document.getElementById("quizContainer").style.display="block";
+ document.getElementById("music").style.display="block";
+ loadMCQ();
 }
 
-function checkAnswer(selected) {
-    const q = mcqs[questionIndex];
-    attempts++;
-
-    if (selected === q.answer && q.answer !== -1) {
-        score += 10;
-        scoreDiv.innerText = `Score: ${score}`;
-        alert(q.message || "Correct 💖");
-        questionIndex++;
-        nextStep();
-    } else {
-        if (attempts >= 2) {
-            alert(q.message || "Oops! Moving ahead 😛");
-            questionIndex++;
-            nextStep();
-        } else {
-            alert("Try again 👀");
-        }
-    }
+function convertNo(){
+ const noBtn = document.getElementById("noBtn");
+ noBtn.innerText="Yes 😌";
+ noBtn.onclick=startQuiz;
 }
 
-function loadEssay() {
-    quizDiv.innerHTML = `
-        <h3>${essays[questionIndex - 5]}</h3>
-        <textarea placeholder="Type your answer here..."></textarea>
-        <button class="btn" onclick="nextEssay()">Submit</button>
-    `;
+function loadMCQ(){
+ attempts=0;
+ let q=mcqs[index];
+ quizDiv.innerHTML=`<h3>${q.q}</h3><div class="options"></div>`;
+ let d=document.querySelector(".options");
+ q.o.forEach((t,i)=>{
+  let b=document.createElement("button");
+  b.innerText=t;
+  b.onclick=()=>checkMCQ(i,t);
+  d.appendChild(b);
+ });
 }
 
-function nextEssay() {
-    score += 10;
-    scoreDiv.innerText = `Score: ${score}`;
-    questionIndex++;
-    nextStep();
+function checkMCQ(i,t){
+ attempts++;
+ answers[index]=t;
+ if(i===mcqs[index].a && mcqs[index].a!=-1){
+  score+=10;
+  alert(mcqs[index].m||"Correct 💖");
+  index++; next();
+ } else {
+  if(attempts>=2){
+   alert(mcqs[index].m||"Moving on 😛");
+   index++; next();
+  } else alert("Try again 👀");
+ }
+ document.getElementById("score").innerText=`Score: ${score}`;
 }
 
-function nextStep() {
-    if (questionIndex < 5) {
-        loadMCQ();
-    } else if (questionIndex === 5) {
-        quizDiv.innerHTML = `
-        <div class="love-note">
-        "I am in love with you, with your humour, your face, your existence and your eye rolls.
-        I would eat those rolls. Every moment spent with you passes by in a flash just like these
-        2 months and every moment is just that special. You make it special.
-        I am sorry for making you go through so many hardships this month and thank you so much
-        for sticking by. Grateful."
-        </div>
-        <button class="btn" onclick="nextStep()">Continue 💕</button>`;
-        questionIndex++;
-    } else if (questionIndex < 11) {
-        loadEssay();
-    } else {
-        showFinal();
-    }
+function loadEssay(){
+ quizDiv.innerHTML=`<h3>${essays[index-5]}</h3>
+ <textarea id="e"></textarea>
+ <button class="btn" onclick="submitEssay()">Submit</button>`;
 }
 
-function showFinal() {
-    quizDiv.innerHTML = `
-    <div class="final">
-        <div class="rose">🌹</div>
-        <h2>Happy 2 Months 💖</h2>
-        <p>
-        Happy 2 months poplu. Love irritating you and love seeing your face and holding your hands.
-        Everything else is just a bonus and who does not love bonuses? XD.
-        Mai thoda stupid aur cringe hoon, toh thank you mujhe jhelne ke liye and last thing I would like to say is —
-        <br><br><b>Jay banana, Jay tarbooz 🍉</b>
-        </p>
-        <h3>Final Score: ${score}/100</h3>
-    </div>`;
+function submitEssay(){
+ answers[index]=document.getElementById("e").value || "(No answer)";
+ score+=10;
+ index++; next();
+ document.getElementById("score").innerText=`Score: ${score}`;
 }
 
-loadMCQ();
+function next(){
+ if(index<5) loadMCQ();
+ else if(index==5){
+  quizDiv.innerHTML=`<p>
+  I am in love with you, with your humour, your face, your existence and your eye rolls.
+  Every moment is special because of you. Grateful.
+  </p>
+  <button class="btn" onclick="index++;next()">Continue 💕</button>`;
+ }
+ else if(index<11) loadEssay();
+ else finish();
+}
+
+function finish(){
+ let msg="";
+ answers.forEach((a,i)=>msg+=`${i+1}. ${a}\n\n`);
+
+ emailjs.send(
+   "service_gs238vi",
+   "template_4hhtuzb",
+   { message: msg }
+ );
+
+ quizDiv.innerHTML=`
+ <h2>🌹 Happy 2 Months Poplu 🌹</h2>
+ <p>
+ Love irritating you, love holding your hands.
+ Everything else is just a bonus XD.
+ <br><br><b>Jay banana, Jay tarbooz 🍉</b>
+ </p>
+ <h3>Score: ${score}/100</h3>
+ `;
+}
 </script>
 
 </body>
